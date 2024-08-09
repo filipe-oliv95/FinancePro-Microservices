@@ -1,10 +1,13 @@
 package com.financepro.accounts.service.impl;
 
 import com.financepro.accounts.constants.AccountsConstants;
+import com.financepro.accounts.dto.AccountsDto;
 import com.financepro.accounts.dto.CustomerDto;
 import com.financepro.accounts.entity.Accounts;
 import com.financepro.accounts.entity.Customer;
 import com.financepro.accounts.exception.CustomerAlreadyExistsException;
+import com.financepro.accounts.exception.ResourceNotFoundException;
+import com.financepro.accounts.mapper.AccountsMapper;
 import com.financepro.accounts.mapper.CustomerMapper;
 import com.financepro.accounts.repository.CustomerRepository;
 import com.financepro.accounts.repository.AccountsRepository;
@@ -54,7 +57,17 @@ public class AccountsServiceImpl implements IAccountsService {
 
     @Override
     public CustomerDto fetchAccount(String mobileNumber) {
-        return null;
+        Customer customer = customerRepository.findByMobileNumber(mobileNumber)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Customer", "mobileNumber", mobileNumber)
+                );
+        Accounts accounts = accountsRepository.findByCustomerId(customer.getCustomerId())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Account", "customerId", customer.getCustomerId().toString())
+                );
+        CustomerDto customerDto = CustomerMapper.mapToCustomerDto(customer, new CustomerDto());
+        customerDto.setAccountsDto(AccountsMapper.mapToAccountsDto(accounts, new AccountsDto()));
+        return customerDto;
     }
 
     @Override
