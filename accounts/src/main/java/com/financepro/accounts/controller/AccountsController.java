@@ -7,14 +7,17 @@ import com.financepro.accounts.dto.ResponseDto;
 import com.financepro.accounts.service.impl.AccountsServiceImpl;
 import com.financepro.accounts.service.IAccountsService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/api")
 @AllArgsConstructor
+@Validated
 public class AccountsController {
 
     private IAccountsService iAccountsService;
@@ -28,7 +31,9 @@ public class AccountsController {
     }
 
     @GetMapping("/fetch")
-    public ResponseEntity<CustomerDto> fetchAccount (@RequestParam String mobileNumber) {
+    public ResponseEntity<CustomerDto> fetchAccount (@RequestParam
+                                                         @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
+                                                         String mobileNumber) {
         CustomerDto customerDto = iAccountsService.fetchAccount(mobileNumber);
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -50,7 +55,9 @@ public class AccountsController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ResponseDto> deleteAccount(@RequestParam String mobileNumber) {
+    public ResponseEntity<ResponseDto> deleteAccount(@RequestParam
+                                                         @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
+                                                         String mobileNumber) {
         boolean isDeleted = iAccountsService.deleteAccount(mobileNumber);
         if (isDeleted) {
             return ResponseEntity
